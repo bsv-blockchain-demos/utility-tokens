@@ -82,23 +82,13 @@ docker-compose -f docker-compose.dev.yml down
 **Tokenization Frontend Service**
 - Multi-stage build: Node.js → Nginx
 - Optimized production build
-- Served via Nginx on port 80 (exposed as 8082)
+- Served via Nginx on port 8080
 - Nginx handles SPA routing
 
 **Tokenization Overlay Service**
+- Remote overlay service at https://store-us-1.bsvb.tech
 - Validates token minting and transfer transactions
-- Runs on port 8083
-- Connects to MySQL and MongoDB databases
-
-**MySQL Database**
-- Stores overlay service data
-- Port 3306
-- User: appuser, Password: apppass, Database: appdb
-
-**MongoDB Database**
-- Stores additional overlay data
-- Port 27017
-- User: root, Password: example
+- Handles token indexing and lookup queries
 
 ### Development Setup (`docker-compose.dev.yml`)
 
@@ -106,60 +96,43 @@ docker-compose -f docker-compose.dev.yml down
 - Runs Vite dev server
 - Hot module replacement (HMR) enabled
 - Source code mounted as volume
-- Runs on port 5173
+- Runs on port 8080
 
 **Overlay Service**
-- Development-friendly logging
-- Source code mounted for hot reload
-- Connects to development databases
+- Remote overlay service (same as production)
+- No local overlay needed for development
 
 ## Networking
 
-Both configurations use a custom bridge network called `token-network`:
-- Services can communicate using service names
-- Frontend calls overlay at `http://tokenization-overlay:8083`
-- External access via mapped ports
+- Frontend runs as standalone container
+- Connects to remote overlay service at `https://store-us-1.bsvb.tech`
+- Port 8080 exposed for browser access
 
 ## Volumes
 
 **Production**
 - No source code mounting (built into image)
-- Database volumes for persistence
+- Static assets served from container
 
 **Development**
-- Source code directories mounted for hot reload
-- `node_modules` explicitly excluded via volume mount
-- Database volumes for persistence
+- Source code mounted for hot reload
+- `node_modules` excluded via volume mount
 
 ## Environment Variables
 
 **Frontend**
 - `VITE_OVERLAY_URL` - Overlay service endpoint
-  - Development: `http://localhost:8083/api`
-  - Production: `http://localhost:8083/api`
-
-**Overlay Service**
-- `NODE_ENV` - production or development
-- `PORT` - Server port (8083)
-- `MYSQL_HOST` - MySQL database host
-- `MYSQL_USER` - MySQL username
-- `MYSQL_PASSWORD` - MySQL password
-- `MYSQL_DATABASE` - MySQL database name
-- `MONGODB_URI` - MongoDB connection string
+  - Default: `https://store-us-1.bsvb.tech` (remote overlay service)
 
 ## Ports
 
 **Production Mode**
-- Frontend: http://localhost:8082
-- Overlay Service: http://localhost:8083
-- MySQL: localhost:3306
-- MongoDB: localhost:27017
+- Frontend: http://localhost:8080
+- Overlay Service: https://store-us-1.bsvb.tech (remote)
 
 **Development Mode**
-- Frontend: http://localhost:5173
-- Overlay Service: http://localhost:8083
-- MySQL: localhost:3306
-- MongoDB: localhost:27017
+- Frontend: http://localhost:8080
+- Overlay Service: https://store-us-1.bsvb.tech (remote)
 
 ## Troubleshooting
 
@@ -177,27 +150,10 @@ make prod
 
 **Port conflicts**
 ```bash
-# Check what's using the ports
-lsof -i :8082
-lsof -i :8083
-lsof -i :5173
-lsof -i :3306
-lsof -i :27017
+# Check what's using the port
+lsof -i :8080
 
-# Change ports in docker-compose.yml if needed
-```
-
-**Database connection issues**
-```bash
-# Check if databases are running
-docker-compose ps
-
-# Check database logs
-docker-compose logs mysql
-docker-compose logs mongodb
-
-# Restart databases
-docker-compose restart mysql mongodb
+# Change port in docker-compose.yml if needed
 ```
 
 **Hot reload not working in dev mode**
@@ -219,31 +175,5 @@ For production deployment:
 4. **Logging**: Configure centralized logging
 5. **Monitoring**: Add health checks and monitoring
 6. **Security**: Review Nginx security headers in `nginx.conf`
-7. **Database Security**: Use strong passwords and configure network access controls
-8. **Backup**: Set up regular database backups
-
-## Database Management
-
-**MySQL**
-```bash
-# Connect to MySQL
-docker-compose exec mysql mysql -u appuser -p
-
-# Backup database
-docker-compose exec mysql mysqldump -u appuser -p appdb > backup.sql
-
-# Restore database
-cat backup.sql | docker-compose exec -T mysql mysql -u appuser -p appdb
-```
-
-**MongoDB**
-```bash
-# Connect to MongoDB
-docker-compose exec mongodb mongosh -u root -p
-
-# Backup database
-docker-compose exec mongodb mongodump -u root -p --out /tmp/backup
-
-# Restore database
-docker-compose exec mongodb mongorestore -u root -p /tmp/backup
-```
+7. **CDN**: Consider using a CDN for static asset delivery
+8. **Caching**: Configure browser caching headers appropriately

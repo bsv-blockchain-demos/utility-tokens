@@ -1,119 +1,118 @@
-# Utility Tokens Demo
+# BSV Token Demo - Frontend
 
-A visual technical demo to illustrate BSV blockchain tokenization capabilities using overlay services.
-
-## Overview
-
-This demo illustrates the simplicity with which companies can create their own tokens on top of BSV Blockchain. It demonstrates the creation, transfer, and redemption of tokens with flexible properties that accommodate both fungible tokens and NFTs.
+A React + TypeScript frontend for creating, transferring, and managing tokens on the BSV blockchain using the PushDrop protocol.
 
 ## Features
 
-- **Token Creation**: Create custom tokens with flexible properties
-- **Fungible Tokens**: Store credit example with amounts and balances
-- **NFTs**: Event tickets (F1 Race) as unique non-fungible tokens
-- **Token Transfer**: Send tokens to other users via identity-based addressing
-- **Token Redemption**: Accept and manage received tokens
-- **Overlay Service**: Validates transactions for minting and transfers
-- **Wallet Management**: Track balances per token ID
+- **Create Tokens**: Mint new fungible tokens with custom fields
+- **Token Wallet**: View your token balances and holdings
+- **Send Tokens**: Transfer tokens to other users
+- **Receive Tokens**: Accept incoming token transfers
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Vite
-- **BSV SDK**: @bsv/sdk for PushDrop tokens
-- **Identity**: @bsv/identity-react for user discovery
-- **Messaging**: @bsv/message-box-client for token transfers
-- **Database**: MySQL (overlay service), MongoDB
-- **Overlay**: Custom overlay service for token validation
+- **Vite** - Fast build tool and dev server
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **@bsv/sdk** - BSV blockchain SDK with PushDrop support
+- **Radix UI** - Accessible component primitives
+- **Sonner** - Toast notifications
 
-## Quick Start with Docker
+## Getting Started
 
-### Using Make (Easiest)
+### Prerequisites
 
-If you have `make` installed:
+- Node.js 18+
+- A BSV wallet browser extension (e.g., [Panda Wallet](https://github.com/Panda-Wallet/panda-wallet))
 
-```bash
-# Production mode
-make prod
-
-# Development mode with hot reload
-make dev
-
-# Stop services
-make down
-
-# View all available commands
-make help
-```
-
-### Using Docker Compose Directly
-
-**Production Mode**
-
-Run the demo with a single command:
+### Installation
 
 ```bash
-docker-compose up --build
+npm install
 ```
 
-Then open:
-- **Tokenization Demo**: http://localhost:8082
-
-Backend services:
-- **Tokenization Overlay**: http://localhost:8083
-
-Databases:
-- **MySQL**: localhost:3306 (user: appuser, password: apppass, database: appdb)
-- **MongoDB**: localhost:27017 (user: root, password: example)
-
-To stop:
-```bash
-docker-compose down
-```
-
-**Development Mode (with Hot Reload)**
-
-For development with automatic code reloading:
+### Development
 
 ```bash
-docker-compose -f docker-compose.dev.yml up --build
+npm run dev
 ```
 
-Changes to source code will automatically reload in the containers.
+The app will be available at `http://localhost:8080`
 
-## Manual Setup
+### Build
 
-See [SPEC.md](./SPEC.md) for detailed technical specifications and implementation details.
+```bash
+npm run build
+```
 
-## Requirements
+### Preview Production Build
 
-**For Docker**:
-- Docker
-- Docker Compose
-
-**For Manual Setup**:
-- Node.js v18+
-- npm or yarn
-- MySQL
-- MongoDB
-
-## Token Types
-
-### Fungible Tokens (Store Credits)
-- **tokenID**: Identifier for the token type (UTF8 string)
-- **amount**: Quantity of tokens (Uint64LE)
-- Custom fields as needed
-
-### NFTs (Event Tickets)
-- **tokenID**: Unique identifier
-- **metadata**: Event details, seat info, etc.
-- Custom fields for ticket properties
+```bash
+npm run preview
+```
 
 ## How It Works
 
-1. **Create Tokens**: Define token properties and mint new tokens using PushDrop
-2. **View Wallet**: Track all tokens by tokenID with current balances
-3. **Send Tokens**: Select recipient via identity search, specify amount, and transfer
-4. **Receive Tokens**: Accept incoming tokens via message box
-5. **Overlay Validation**: All transactions validated by overlay service
+### Token Creation
 
-For technical implementation details, see [SPEC.md](./SPEC.md).
+1. Navigate to the "Create Tokens" tab
+2. Enter a Token ID (e.g., "Local Store Credits")
+3. Specify the amount to mint
+4. Optionally add custom fields (key-value pairs)
+5. Click "Create Tokens"
+
+The app uses the `PushDrop` class from `@bsv/sdk`:
+
+```typescript
+const token = new PushDrop(wallet)
+const protocolID = [2, 'tokendemo']
+const keyID = Utils.toBase64(Random(8))
+const lockingScript = await token.lock(fields, protocolID, keyID, 'self', true, true)
+```
+
+### Token Transfers
+
+1. Go to "Send Tokens" tab
+2. Select the token ID and amount
+3. Enter recipient's identity key
+4. The transaction is sent to their message box
+5. Recipient can accept in the "Receive Tokens" tab
+
+### Wallet Integration
+
+The app automatically connects to your BSV wallet via the `WalletClient` from `@bsv/sdk`. Make sure you have a compatible wallet installed.
+
+## Architecture
+
+```
+src/
+├── components/
+│   ├── TokenDemo.tsx        # Main app with tabs
+│   ├── CreateTokens.tsx     # Token minting form
+│   ├── TokenWallet.tsx      # Balance display
+│   ├── SendTokens.tsx       # Transfer interface
+│   ├── ReceiveTokens.tsx    # Accept incoming tokens
+│   └── ui/                  # Reusable UI components
+├── context/
+│   └── WalletContext.tsx    # Wallet state management
+└── App.tsx                  # App entry point
+```
+
+## TODO
+
+- [ ] Integrate with overlay service for token validation
+- [ ] Implement identity search functionality
+- [ ] Add message box integration for token transfers
+- [ ] Add NFT support with unique token properties
+- [ ] Implement token history and transaction details
+- [ ] Add QR code scanning for recipient addresses
+
+## Related
+
+- [SPEC.md](../SPEC.md) - Full specification
+- [Overlay Service](../overlay/) - Backend token validation
+
+## License
+
+MIT

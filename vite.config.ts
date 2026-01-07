@@ -10,4 +10,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    port: 8080,
+    host: true, // Listen on all addresses, needed for Docker
+  },
+  preview: {
+    port: 8080,
+    host: true,
+  },
 })

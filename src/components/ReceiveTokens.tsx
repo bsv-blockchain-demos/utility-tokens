@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { WalletClient, Transaction, type AtomicBEEF } from '@bsv/sdk'
+import { WalletClient, type AtomicBEEF } from '@bsv/sdk'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { toast } from 'sonner'
@@ -12,7 +12,7 @@ interface ReceiveTokensProps {
 interface PendingToken {
   id: string
   tokenId: string
-  amount: number
+  amount: string
   sender: string
   timestamp: number
   keyID: string
@@ -46,7 +46,7 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
       })
 
       // Parse messages into pending tokens
-      const pending: PendingToken[] = messages.map(msg => ({
+      const pending: PendingToken[] = messages.map((msg: { messageId: string, body: any }) => ({
         id: msg.messageId,
         tokenId: msg.body.tokenId,
         amount: msg.body.amount,
@@ -77,15 +77,11 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
         throw new Error('MessageBoxClient not available')
       }
 
-      // Parse the transaction to find the correct output
-      const tx = Transaction.fromBEEF(pendingToken.transaction)
-      const outputIndex = 0  // First output is the counterparty output
-
       // Internalize the token using basket insertion protocol
       await wallet.internalizeAction({
         tx: pendingToken.transaction,
         outputs: [{
-          outputIndex,
+          outputIndex: 0,
           protocol: 'basket insertion',
           insertionRemittance: {
             basket: 'demotokens3',
