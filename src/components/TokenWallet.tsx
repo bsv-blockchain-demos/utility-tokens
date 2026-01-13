@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { WalletClient, PushDrop, LockingScript, Utils } from '@bsv/sdk'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'

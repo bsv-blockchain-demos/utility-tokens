@@ -1,11 +1,13 @@
+'use client'
+
 import { useState } from 'react'
 import { WalletClient, PushDrop, Utils, Random, BigNumber, HTTPSOverlayBroadcastFacilitator, Transaction } from '@bsv/sdk'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { toast } from 'sonner'
 
-const VITE_OVERLAY_URL = import.meta.env.VITE_OVERLAY_URL as string
-if (!VITE_OVERLAY_URL) throw new Error('VITE_OVERLAY_URL is not defined')
+const OVERLAY_URL = process.env.NEXT_PUBLIC_OVERLAY_URL as string
+if (!OVERLAY_URL) throw new Error('NEXT_PUBLIC_OVERLAY_URL is not defined')
 
 interface CreateTokensProps {
   wallet: WalletClient
@@ -119,7 +121,7 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
         topics: ['tm_tokendemo']
       }
 
-      const overlayResponse = await overlay.send(VITE_OVERLAY_URL, taggedBEEF)
+      const overlayResponse = await overlay.send(OVERLAY_URL, taggedBEEF)
 
       if (overlayResponse['tm_tokendemo'].outputsToAdmit.length !== 1) throw new Error('overlay rejection')
 
