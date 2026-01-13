@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { WalletClient, PushDrop, LockingScript, Utils } from '@bsv/sdk'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
+import { Wallet, RefreshCw, Coins } from 'lucide-react'
 
 interface TokenWalletProps {
   wallet: WalletClient
@@ -62,12 +63,38 @@ export function TokenWallet({ wallet }: TokenWalletProps) {
   if (isLoading) {
     return (
       <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle>My Token Wallet</CardTitle>
+        <CardHeader className="space-y-3 pb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+                <Wallet className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl">My Token Wallet</CardTitle>
+                <CardDescription className="text-base">
+                  View your token balances and holdings
+                </CardDescription>
+              </div>
+            </div>
+            <Button
+              onClick={refreshBalances}
+              variant="outline"
+              className="w-full sm:w-auto"
+              size="default"
+              disabled
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Refresh</span>
+              <span className="sm:hidden">Refresh Balances</span>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            Loading balances...
+          <div className="text-center py-12">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <RefreshCw className="h-8 w-8 text-purple-600 animate-spin" />
+            </div>
+            <p className="text-gray-600">Loading your token balances...</p>
           </div>
         </CardContent>
       </Card>
@@ -76,16 +103,28 @@ export function TokenWallet({ wallet }: TokenWalletProps) {
 
   return (
     <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>My Token Wallet</CardTitle>
-            <CardDescription>
-              View your token balances and holdings
-            </CardDescription>
+      <CardHeader className="space-y-3 pb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+              <Wallet className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">My Token Wallet</CardTitle>
+              <CardDescription className="text-base">
+                View your token balances and holdings
+              </CardDescription>
+            </div>
           </div>
-          <Button onClick={refreshBalances} variant="outline">
-            Refresh
+          <Button
+            onClick={refreshBalances}
+            variant="outline"
+            className="w-full sm:w-auto"
+            size="default"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Refresh</span>
+            <span className="sm:hidden">Refresh Balances</span>
           </Button>
         </div>
       </CardHeader>
@@ -113,22 +152,25 @@ export function TokenWallet({ wallet }: TokenWalletProps) {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Array.from(balances.entries()).map(([tokenId, amount]) => (
               <div
                 key={tokenId}
-                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                className="border border-gray-200 rounded-xl p-5 hover:bg-gradient-to-br hover:from-purple-50 hover:to-blue-50 hover:border-purple-200 transition-all hover:shadow-md group"
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                    <Coins className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">
                       {amount.label}
                     </h3>
-                    <p className="text-2xl font-bold text-purple-600 mt-1">
+                    <p className="text-3xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text mt-2">
                       {Number(amount.amount).toLocaleString()}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {amount.label}
+                    <p className="text-xs text-gray-500 mt-2 font-mono truncate">
+                      {tokenId.slice(0, 8)}...{tokenId.slice(-8)}
                     </p>
                   </div>
                 </div>

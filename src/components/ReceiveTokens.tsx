@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button'
 import { toast } from 'sonner'
 import { useWallet } from '../context/WalletContext'
+import { Download, Check, X, RefreshCw, Clock, Loader2 } from 'lucide-react'
 
 interface ReceiveTokensProps {
   wallet: WalletClient
@@ -27,6 +28,7 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
   const [pendingTokens, setPendingTokens] = useState<PendingToken[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [acceptingTokenId, setAcceptingTokenId] = useState<string | null>(null)
+  const [rejectingTokenId, setRejectingTokenId] = useState<string | null>(null)
 
   useEffect(() => {
     loadPendingTokens()
@@ -107,12 +109,16 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
       const updatedPending = pendingTokens.filter(t => t.id !== pendingToken.id)
       setPendingTokens(updatedPending)
 
-      toast.success(`Accepted ${pendingToken.amount} ${pendingToken.tokenId} tokens!`)
+      toast.success('Tokens accepted successfully!', {
+        description: `Received ${Number(pendingToken.amount).toLocaleString()} ${pendingToken.tokenId} tokens`,
+        duration: 5000,
+      })
 
     } catch (error) {
       console.error('Error accepting tokens:', error)
       toast.error('Failed to accept tokens', {
-        description: error instanceof Error ? error.message : 'Unknown error'
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        duration: 5000,
       })
     } finally {
       setAcceptingTokenId(null)
@@ -120,6 +126,7 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
   }
 
   const handleRejectToken = async (pendingToken: PendingToken) => {
+    setRejectingTokenId(pendingToken.id)
     try {
       if (!messageBoxClient) {
         throw new Error('MessageBoxClient not available')
@@ -134,12 +141,18 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
       const updatedPending = pendingTokens.filter(t => t.id !== pendingToken.id)
       setPendingTokens(updatedPending)
 
-      toast.info('Token transfer rejected')
+      toast.info('Transfer rejected', {
+        description: 'The token transfer has been declined',
+        duration: 3000,
+      })
     } catch (error) {
       console.error('Error rejecting token:', error)
-      toast.error('Failed to reject token', {
-        description: error instanceof Error ? error.message : 'Unknown error'
+      toast.error('Failed to reject tokens', {
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        duration: 5000,
       })
+    } finally {
+      setRejectingTokenId(null)
     }
   }
 
@@ -150,12 +163,38 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
   if (isLoading) {
     return (
       <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle>Receive Tokens</CardTitle>
+        <CardHeader className="space-y-3 pb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+                <Download className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Receive Tokens</CardTitle>
+                <CardDescription className="text-base">
+                  Accept or reject tokens sent to you by others
+                </CardDescription>
+              </div>
+            </div>
+            <Button
+              onClick={refreshPending}
+              variant="outline"
+              className="w-full sm:w-auto"
+              size="default"
+              disabled
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Refresh</span>
+              <span className="sm:hidden">Refresh Pending</span>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            Loading pending tokens...
+          <div className="text-center py-12">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <RefreshCw className="h-8 w-8 text-purple-600 animate-spin" />
+            </div>
+            <p className="text-gray-600">Loading pending tokens...</p>
           </div>
         </CardContent>
       </Card>
@@ -164,16 +203,28 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
 
   return (
     <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Receive Tokens</CardTitle>
-            <CardDescription>
-              Accept or reject tokens sent to you by others
-            </CardDescription>
+      <CardHeader className="space-y-3 pb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+              <Download className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">Receive Tokens</CardTitle>
+              <CardDescription className="text-base">
+                Accept or reject tokens sent to you by others
+              </CardDescription>
+            </div>
           </div>
-          <Button onClick={refreshPending} variant="outline">
-            Refresh
+          <Button
+            onClick={refreshPending}
+            variant="outline"
+            className="w-full sm:w-auto"
+            size="default"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Refresh</span>
+            <span className="sm:hidden">Refresh Pending</span>
           </Button>
         </div>
       </CardHeader>
@@ -230,18 +281,40 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
                   <div className="flex gap-2 ml-4">
                     <Button
                       onClick={() => handleAcceptToken(pending)}
-                      disabled={acceptingTokenId === pending.id}
+                      disabled={acceptingTokenId === pending.id || rejectingTokenId === pending.id}
                       className="bg-green-600 hover:bg-green-700 text-white"
+                      size="sm"
                     >
-                      {acceptingTokenId === pending.id ? 'Accepting...' : 'Accept'}
+                      {acceptingTokenId === pending.id ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          Accepting...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-3 w-3 mr-1" />
+                          Accept
+                        </>
+                      )}
                     </Button>
                     <Button
                       onClick={() => handleRejectToken(pending)}
-                      disabled={acceptingTokenId === pending.id}
+                      disabled={acceptingTokenId === pending.id || rejectingTokenId === pending.id}
                       variant="outline"
                       className="text-red-600 border-red-600 hover:bg-red-50"
+                      size="sm"
                     >
-                      Reject
+                      {rejectingTokenId === pending.id ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          Rejecting...
+                        </>
+                      ) : (
+                        <>
+                          <X className="h-3 w-3 mr-1" />
+                          Reject
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>

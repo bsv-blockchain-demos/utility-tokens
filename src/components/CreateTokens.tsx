@@ -47,12 +47,18 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
 
   const handleCreateTokens = async () => {
     if (!label.trim()) {
-      toast.error('Please enter a token label')
+      toast.error('Token label required', {
+        description: 'Please enter a label for your tokens',
+        duration: 3000,
+      })
       return
     }
 
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      toast.error('Please enter a valid amount')
+      toast.error('Invalid amount', {
+        description: 'Please enter a valid amount greater than 0',
+        duration: 3000,
+      })
       return
     }
 
@@ -112,8 +118,9 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
 
       if (!response?.txid) throw new Error('unable to issue those tokens')
 
-      toast.success(`Successfully created ${amount} ${label} tokens!`, {
-        description: `Script created with ${fields.length} fields`
+      toast.success('Tokens created successfully!', {
+        description: `Created ${Number(amount).toLocaleString()} ${label} tokens`,
+        duration: 5000,
       })
 
       const overlay = new HTTPSOverlayBroadcastFacilitator(undefined, true)
@@ -128,8 +135,9 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
 
       if (overlayResponse['tm_tokendemo'].outputsToAdmit.length !== 1) throw new Error('overlay rejection')
 
-      toast.success(`Accepted by overlay`, {
-        description: `The tx passed Overlay Validation`
+      toast.success('Overlay validation passed', {
+        description: 'Your tokens are now on the blockchain',
+        duration: 5000,
       })
 
       // Reset form
@@ -140,7 +148,8 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
     } catch (error) {
       console.error('Error creating tokens:', error)
       toast.error('Failed to create tokens', {
-        description: error instanceof Error ? error.message : 'Unknown error'
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        duration: 5000,
       })
     } finally {
       setIsCreating(false)
@@ -148,7 +157,23 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
   }
 
   return (
-    <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+    <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm relative">
+      {/* Loading Overlay */}
+      {isCreating && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-purple-500 rounded-full blur-xl opacity-30 animate-pulse"></div>
+              <Loader2 className="h-16 w-16 text-purple-600 animate-spin relative mx-auto" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-gray-900">Creating Tokens...</h3>
+              <p className="text-sm text-gray-600">Please wait while we mint your tokens on the blockchain</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <CardHeader className="space-y-3 pb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
@@ -161,8 +186,9 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
           You can also add custom fields to define additional properties.
         </CardDescription>
       </CardHeader>
+
       <CardContent className="space-y-6">
-        <div className="space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
             <Label htmlFor="label" required>
               Token Label
@@ -193,13 +219,15 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
               autoComplete="off"
             />
           </div>
+        </div>
 
+        <div className="space-y-5">
           {/* Custom Fields */}
           {customFields.length > 0 && (
             <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
               <Label className="text-base">Custom Fields</Label>
               <div className="space-y-3">
-                {customFields.map((field, index) => (
+                {customFields.map((field) => (
                   <div key={field.id} className="flex gap-2 items-start animate-in fade-in duration-300">
                     <div className="flex-1 space-y-2">
                       <Input
@@ -243,9 +271,8 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
             <Plus className="h-4 w-4 mr-2" />
             Add Custom Field
           </Button>
-        </div>
 
-        <Button
+          <Button
           onClick={handleCreateTokens}
           disabled={isCreating}
           className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium shadow-lg hover:shadow-xl transition-all"
@@ -262,18 +289,19 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
               Create Tokens
             </>
           )}
-        </Button>
+          </Button>
 
-        <div className="text-sm text-gray-600 space-y-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
-          <p className="font-semibold text-blue-900 flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />
-            Example:
-          </p>
-          <ul className="list-disc list-inside space-y-1.5 ml-2 text-blue-800">
-            <li>Token Label: "Local Store Credits"</li>
-            <li>Amount: 10000</li>
-            <li>Custom Field: issuer = "My Local Store"</li>
-          </ul>
+          <div className="text-sm text-gray-600 space-y-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <p className="font-semibold text-blue-900 flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Example:
+            </p>
+            <ul className="list-disc list-inside space-y-1.5 ml-2 text-blue-800">
+              <li>Token Label: "Local Store Credits"</li>
+              <li>Amount: 10000</li>
+              <li>Custom Field: issuer = "My Local Store"</li>
+            </ul>
+          </div>
         </div>
       </CardContent>
     </Card>
