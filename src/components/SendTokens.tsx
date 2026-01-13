@@ -367,7 +367,7 @@ export function SendTokens({ wallet }: SendTokensProps) {
   }
 
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle>Send Tokens</CardTitle>
         <CardDescription>

@@ -149,7 +149,7 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
 
   if (isLoading) {
     return (
-      <Card className="max-w-4xl mx-auto">
+      <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Receive Tokens</CardTitle>
         </CardHeader>
@@ -163,7 +163,7 @@ export function ReceiveTokens({ wallet }: ReceiveTokensProps) {
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
