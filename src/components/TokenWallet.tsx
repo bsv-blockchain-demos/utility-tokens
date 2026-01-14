@@ -66,7 +66,7 @@ export function TokenWallet({ wallet }: TokenWalletProps) {
         <CardHeader className="space-y-3 pb-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+              <div className="p-2 bg-linear-to-br from-purple-500 to-blue-600 rounded-lg">
                 <Wallet className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -106,7 +106,7 @@ export function TokenWallet({ wallet }: TokenWalletProps) {
       <CardHeader className="space-y-3 pb-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+            <div className="p-2 bg-linear-to-br from-purple-500 to-blue-600 rounded-lg">
               <Wallet className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -156,7 +156,7 @@ export function TokenWallet({ wallet }: TokenWalletProps) {
             {Array.from(balances.entries()).map(([tokenId, amount]) => (
               <div
                 key={tokenId}
-                className="border border-gray-200 rounded-xl p-5 hover:bg-gradient-to-br hover:from-purple-50 hover:to-blue-50 hover:border-purple-200 transition-all hover:shadow-md group"
+                className="border border-gray-200 rounded-xl p-5 hover:bg-linear-to-br hover:from-purple-50 hover:to-blue-50 hover:border-purple-200 transition-all hover:shadow-md group"
               >
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
@@ -166,7 +166,7 @@ export function TokenWallet({ wallet }: TokenWalletProps) {
                     <h3 className="text-lg font-semibold text-gray-900 truncate">
                       {amount.label}
                     </h3>
-                    <p className="text-3xl font-bold text-transparent bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text mt-2">
+                    <p className="text-3xl font-bold text-transparent bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text mt-2">
                       {Number(amount.amount).toLocaleString()}
                     </p>
                     <p className="text-xs text-gray-500 mt-2 font-mono truncate">

@@ -112,7 +112,7 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
         ],
         labels: ['demotokens3', 'mint'],
         options: {
-          randomizeOutputs: false,  
+          randomizeOutputs: false,
         }
       })
 
@@ -176,7 +176,7 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
 
       <CardHeader className="space-y-3 pb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+          <div className="p-2 bg-linear-to-br from-purple-500 to-blue-600 rounded-lg">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <CardTitle className="text-2xl">Create Simple Tokens</CardTitle>
@@ -275,7 +275,7 @@ export function CreateTokens({ wallet }: CreateTokensProps) {
           <Button
           onClick={handleCreateTokens}
           disabled={isCreating}
-          className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium shadow-lg hover:shadow-xl transition-all"
+          className="w-full h-12 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium shadow-lg hover:shadow-xl transition-all"
           type="button"
         >
           {isCreating ? (
