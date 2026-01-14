@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - VITE_OVERLAY_URL=https://store-us-1.bsvb.tech
+        - NEXT_PUBLIC_OVERLAY_URL=https://overlay-us-1.bsvb.tech
     container_name: tokenization-frontend
     ports:
       - "8080:8080"

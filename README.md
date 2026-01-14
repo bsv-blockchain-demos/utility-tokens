@@ -11,11 +11,13 @@ A React + TypeScript frontend for creating, transferring, and managing tokens on
 
 ## Tech Stack
 
-- **Vite** - Fast build tool and dev server
+- **Next.js 16** - React framework with server-side rendering
 - **React 19** - UI framework
 - **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
+- **Tailwind CSS v4** - Modern utility-first styling
 - **@bsv/sdk** - BSV blockchain SDK with PushDrop support
+- **@bsv/identity-react** - Identity management and search
+- **@bsv/message-box-client** - Peer-to-peer messaging
 - **Radix UI** - Accessible component primitives
 - **Sonner** - Toast notifications
 
@@ -54,11 +56,33 @@ The app will be available at `http://localhost:8080`
 npm run build
 ```
 
-### Preview Production Build
+### Start Production Server
 
 ```bash
-npm run preview
+npm start
 ```
+
+## Docker
+
+This project includes Docker support for both development and production environments.
+
+### Quick Start with Docker
+
+```bash
+# Production mode
+npm run docker:prod
+
+# Development mode (with hot reload)
+npm run docker:dev
+
+# Stop services
+npm run docker:down
+
+# View logs
+npm run docker:logs
+```
+
+For detailed Docker documentation, see [DOCKER.md](DOCKER.md)
 
 ## How It Works
 
@@ -94,6 +118,11 @@ The app automatically connects to your BSV wallet via the `WalletClient` from `@
 ## Architecture
 
 ```
+app/
+├── page.tsx                 # Home page (main entry)
+├── layout.tsx               # Root layout with providers
+└── globals.css              # Global styles
+
 src/
 ├── components/
 │   ├── TokenDemo.tsx        # Main app with tabs
@@ -102,24 +131,14 @@ src/
 │   ├── SendTokens.tsx       # Transfer interface
 │   ├── ReceiveTokens.tsx    # Accept incoming tokens
 │   └── ui/                  # Reusable UI components
-├── context/
-│   └── WalletContext.tsx    # Wallet state management
-└── App.tsx                  # App entry point
+└── context/
+    └── WalletContext.tsx    # Wallet state management
 ```
 
-## TODO
+## Related Documentation
 
-- [ ] Integrate with overlay service for token validation
-- [ ] Implement identity search functionality
-- [ ] Add message box integration for token transfers
-- [ ] Add NFT support with unique token properties
-- [ ] Implement token history and transaction details
-- [ ] Add QR code scanning for recipient addresses
-
-## Related
-
-- [SPEC.md](../SPEC.md) - Full specification
-- [Overlay Service](../overlay/) - Backend token validation
+- [DOCKER.md](DOCKER.md) - Docker setup and deployment guide
+- [SPEC.md](SPEC.md) - Full specification and technical details
 
 ## License
 

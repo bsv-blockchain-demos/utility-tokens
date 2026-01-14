@@ -10,7 +10,7 @@ The token issuance properties should be flexible enough to accommodate fungible 
 
 ## Tech
 
-Clone the frontend from access-control demo, then remove the specific content to create this starting point for this tokenization app. So Vite and React with Typescript.
+Built with Next.js 16, React 19, and TypeScript for a modern, production-ready application.
 
 We ought to use PushDrop class from the @bsv/sdk to create and redeem tokens using the lock and unlock methods respectively. The fields to use will depend on the particular token type but in general the approach ought to be to mint a token with some properties defining it, then refer to that mint txid in subsequent spends of the token to reduce the amount of data necessary to include in each token. 
 

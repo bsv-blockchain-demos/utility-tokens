@@ -2,51 +2,43 @@
 
 This document explains the Docker configuration for the utility tokens demo.
 
-## Files Created
+## Files
 
 ### Root Level
 - `docker-compose.yml` - Production configuration
 - `docker-compose.dev.yml` - Development configuration with hot reload
-- `Makefile` - Convenient commands for running Docker
-- `.dockerignore` - Excludes unnecessary files from Docker builds
-
-### Tokenization Frontend (`tokenization/frontend/`)
-- `Dockerfile` - Multi-stage build with Nginx for production
+- `Dockerfile` - Multi-stage build for Next.js production
 - `Dockerfile.dev` - Development image for hot reload
-- `nginx.conf` - Nginx configuration for serving the SPA
-- `.dockerignore` - Frontend-specific exclusions
-- `.env.production` - Production environment variables
-- `.env.development` - Development environment variables
-
-### Tokenization Overlay (`tokenization/overlay/`)
-- `Dockerfile` - Overlay service image
-- `.dockerignore` - Overlay-specific exclusions
+- `.dockerignore` - Excludes unnecessary files from Docker builds
 
 ## Usage
 
-### Quick Commands (with Make)
+### Quick Commands (with npm scripts)
 
 ```bash
 # Start production services
-make prod
+npm run docker:prod
 
 # Start development services (hot reload enabled)
-make dev
+npm run docker:dev
 
 # Stop services
-make down
+npm run docker:down
 
 # View logs
-make logs
+npm run docker:logs
 
 # Clean everything (containers, volumes, images)
-make clean
+npm run docker:clean
 
-# See all available commands
-make help
+# Build images
+npm run docker:build
+
+# Start services in background
+npm run docker:up
 ```
 
-### Docker Compose Commands
+### Docker Compose Commands (Direct)
 
 **Production**
 ```bash
@@ -80,22 +72,22 @@ docker-compose -f docker-compose.dev.yml down
 ### Production Setup (`docker-compose.yml`)
 
 **Tokenization Frontend Service**
-- Multi-stage build: Node.js → Nginx
-- Optimized production build
-- Served via Nginx on port 8080
-- Nginx handles SPA routing
+- Multi-stage build: deps → builder → runner
+- Next.js standalone output for optimal production builds
+- Self-contained Node.js server on port 8080
+- Runs as non-root user for security
 
 **Tokenization Overlay Service**
-- Remote overlay service at https://store-us-1.bsvb.tech
+- Remote overlay service at https://overlay-us-1.bsvb.tech
 - Validates token minting and transfer transactions
 - Handles token indexing and lookup queries
 
 ### Development Setup (`docker-compose.dev.yml`)
 
 **Frontend Service**
-- Runs Vite dev server
+- Runs Next.js dev server with webpack
 - Hot module replacement (HMR) enabled
-- Source code mounted as volume
+- Source code mounted as volume for live updates
 - Runs on port 8080
 
 **Overlay Service**
@@ -105,7 +97,7 @@ docker-compose -f docker-compose.dev.yml down
 ## Networking
 
 - Frontend runs as standalone container
-- Connects to remote overlay service at `https://store-us-1.bsvb.tech`
+- Connects to remote overlay service at `https://overlay-us-1.bsvb.tech`
 - Port 8080 exposed for browser access
 
 ## Volumes
@@ -121,31 +113,31 @@ docker-compose -f docker-compose.dev.yml down
 ## Environment Variables
 
 **Frontend**
-- `VITE_OVERLAY_URL` - Overlay service endpoint
-  - Default: `https://store-us-1.bsvb.tech` (remote overlay service)
+- `NEXT_PUBLIC_OVERLAY_URL` - Overlay service endpoint
+  - Default: `https://overlay-us-1.bsvb.tech` (remote overlay service)
 
 ## Ports
 
 **Production Mode**
 - Frontend: http://localhost:8080
-- Overlay Service: https://store-us-1.bsvb.tech (remote)
+- Overlay Service: https://overlay-us-1.bsvb.tech (remote)
 
 **Development Mode**
 - Frontend: http://localhost:8080
-- Overlay Service: https://store-us-1.bsvb.tech (remote)
+- Overlay Service: https://overlay-us-1.bsvb.tech (remote)
 
 ## Troubleshooting
 
 **Containers won't start**
 ```bash
 # Check logs
-make logs
+npm run docker:logs
 # or
 docker-compose logs -f
 
 # Rebuild from scratch
-make clean
-make prod
+npm run docker:clean
+npm run docker:prod
 ```
 
 **Port conflicts**
@@ -169,11 +161,11 @@ docker-compose -f docker-compose.dev.yml config
 
 For production deployment:
 
-1. **Environment Variables**: Update `.env.production` with production URLs
-2. **SSL/TLS**: Configure Nginx with SSL certificates
-3. **Reverse Proxy**: Consider using a reverse proxy (Traefik, Nginx) in front
-4. **Logging**: Configure centralized logging
+1. **Environment Variables**: Set `NEXT_PUBLIC_OVERLAY_URL` build arg in docker-compose.yml
+2. **SSL/TLS**: Configure SSL certificates (using Nginx or cloud provider)
+3. **Reverse Proxy**: Consider using a reverse proxy (Traefik, Nginx, Caddy) in front
+4. **Logging**: Configure centralized logging for the Next.js container
 5. **Monitoring**: Add health checks and monitoring
-6. **Security**: Review Nginx security headers in `nginx.conf`
+6. **Security**: Next.js runs as non-root user; review security headers in next.config.mjs
 7. **CDN**: Consider using a CDN for static asset delivery
-8. **Caching**: Configure browser caching headers appropriately
+8. **Caching**: Configure appropriate caching headers in Next.js config
