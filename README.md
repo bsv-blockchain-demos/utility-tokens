@@ -32,6 +32,14 @@ A React + TypeScript frontend for creating, transferring, and managing tokens on
 npm install
 ```
 
+### Configuration
+
+Create a `.env` file in the root directory with the following:
+
+```bash
+NEXT_PUBLIC_OVERLAY_URL=https://overlay-us-1.bsvb.tech
+```
+
 ### Development
 
 ```bash
