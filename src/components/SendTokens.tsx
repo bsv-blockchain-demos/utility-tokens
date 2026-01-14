@@ -1,13 +1,18 @@
+'use client'
+
 import { useState, useEffect, useRef } from 'react'
 import { Transaction, Beef, WalletClient, PushDrop, PublicKey, LockingScript, Random, BigNumber, Utils, HTTPSOverlayBroadcastFacilitator, type AtomicBEEF } from '@bsv/sdk'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 import { toast } from 'sonner'
 import { useIdentitySearch } from '@bsv/identity-react'
 import { useWallet } from '../context/WalletContext'
+import { Send, ArrowRight, Loader2 } from 'lucide-react'
 
-const VITE_OVERLAY_URL = import.meta.env.VITE_OVERLAY_URL as string
-if (!VITE_OVERLAY_URL) throw new Error('VITE_OVERLAY_URL is not defined')
+const OVERLAY_URL = process.env.NEXT_PUBLIC_OVERLAY_URL as string
+if (!OVERLAY_URL) throw new Error('NEXT_PUBLIC_OVERLAY_URL is not defined')
 
 interface SendTokensProps {
   wallet: WalletClient
@@ -120,12 +125,18 @@ export function SendTokens({ wallet }: SendTokensProps) {
 
   const handleSendTokens = async () => {
     if (!tokenId.trim()) {
-      toast.error('Please select a token')
+      toast.error('Token required', {
+        description: 'Please select a token to send',
+        duration: 3000,
+      })
       return
     }
 
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      toast.error('Please enter a valid amount')
+      toast.error('Invalid amount', {
+        description: 'Please enter a valid amount greater than 0',
+        duration: 3000,
+      })
       return
     }
 
@@ -137,24 +148,34 @@ export function SendTokens({ wallet }: SendTokensProps) {
     console.log({ tokenId, balanceInfo, availableBalance, sendAmount })
 
     if (availableBalance === 0) {
-      toast.error(`You don't have any ${balanceInfo?.label || tokenId} tokens`)
+      toast.error('No tokens available', {
+        description: `You don't have any ${balanceInfo?.label || tokenId} tokens`,
+        duration: 4000,
+      })
       return
     }
 
     if (sendAmount > availableBalance) {
-      toast.error(`Insufficient balance. You have ${availableBalance.toLocaleString()} ${balanceInfo?.label || tokenId}`, {
-        description: `You're trying to send ${sendAmount.toLocaleString()}`
+      toast.error('Insufficient balance', {
+        description: `You have ${availableBalance.toLocaleString()} ${balanceInfo?.label || tokenId}, but trying to send ${sendAmount.toLocaleString()}`,
+        duration: 5000,
       })
       return
     }
 
     if (!recipient.trim()) {
-      toast.error('Please enter a recipient identity')
+      toast.error('Recipient required', {
+        description: 'Please enter a recipient identity',
+        duration: 3000,
+      })
       return
     }
 
     if (!messageBoxClient) {
-      toast.error('Message box client not initialized')
+      toast.error('Connection error', {
+        description: 'Message box client not initialized',
+        duration: 4000,
+      })
       return
     }
 
@@ -304,8 +325,9 @@ export function SendTokens({ wallet }: SendTokensProps) {
 
       console.log({ didItWork })
 
-      toast.success(`Tx Created`, {
-        description: `${amount} ${balanceInfo?.label || tokenId} tokens in ${didItWork.txid}`
+      toast.success('Transaction created', {
+        description: `Sending ${Number(amount).toLocaleString()} ${balanceInfo?.label || tokenId} tokens`,
+        duration: 4000,
       })
 
       const overlay = new HTTPSOverlayBroadcastFacilitator(undefined, true)
@@ -315,12 +337,13 @@ export function SendTokens({ wallet }: SendTokensProps) {
         topics: ['tm_tokendemo']
       }
 
-      const overlayResponse = await overlay.send(VITE_OVERLAY_URL, taggedBEEF)
+      const overlayResponse = await overlay.send(OVERLAY_URL, taggedBEEF)
 
       if (overlayResponse['tm_tokendemo'].outputsToAdmit.length === 0) throw new Error('overlay rejection')
 
-      toast.success(`Accepted by overlay`, {
-        description: `The tx passed Overlay Validation`
+      toast.success('Overlay validation passed', {
+        description: 'Transaction validated on the blockchain',
+        duration: 4000,
       })
 
       const { publicKey: sender } = await wallet.getPublicKey({ identityKey: true })
@@ -339,8 +362,9 @@ export function SendTokens({ wallet }: SendTokensProps) {
         }
       })
 
-      toast.success(`Successfully sent ${amount} ${balanceInfo?.label || tokenId} tokens!`, {
-        description: `To: ${recipient.slice(0, 10)}...`
+      toast.success('Tokens sent successfully!', {
+        description: `${Number(amount).toLocaleString()} ${balanceInfo?.label || tokenId} to ${recipient.slice(0, 12)}...`,
+        duration: 6000,
       })
 
       // Reload balances to reflect the sent tokens
@@ -357,7 +381,8 @@ export function SendTokens({ wallet }: SendTokensProps) {
     } catch (error) {
       console.error('Error sending tokens:', error)
       toast.error('Failed to send tokens', {
-        description: error instanceof Error ? error.message : 'Unknown error'
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        duration: 5000,
       })
     } finally {
       setIsSending(false)
@@ -365,19 +390,42 @@ export function SendTokens({ wallet }: SendTokensProps) {
   }
 
   return (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Send Tokens</CardTitle>
-        <CardDescription>
-          Transfer tokens to another user by specifying their identity key.
-        </CardDescription>
+    <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm relative">
+      {/* Loading Overlay */}
+      {isSending && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-blue-500 rounded-full blur-xl opacity-30 animate-pulse"></div>
+              <Loader2 className="h-16 w-16 text-blue-600 animate-spin relative mx-auto" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-gray-900">Sending Tokens...</h3>
+              <p className="text-sm text-gray-600">Please wait while we process your transfer</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <CardHeader className="space-y-3 pb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
+            <Send className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <CardTitle className="text-2xl">Send Tokens</CardTitle>
+            <CardDescription className="text-base">
+              Transfer tokens to another user by specifying their identity key
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="sendTokenId" className="block text-sm font-medium text-gray-700 mb-1">
-              Token ID *
-            </label>
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="sendTokenId" required>
+              Token ID
+            </Label>
             {isLoadingBalances ? (
               <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
                 Loading tokens...
