@@ -11,7 +11,7 @@ A React + TypeScript frontend for creating, transferring, and managing tokens on
 
 ## Tech Stack
 
-- **Next.js 16** - React framework with server-side rendering
+- **Vite 6** - Next-generation frontend build tool with fast HMR
 - **React 19** - UI framework
 - **TypeScript** - Type safety
 - **Tailwind CSS v4** - Modern utility-first styling
@@ -39,7 +39,7 @@ npm install
 Create a `.env` file in the root directory with the following:
 
 ```bash
-NEXT_PUBLIC_OVERLAY_URL=https://overlay-us-1.bsvb.tech
+VITE_OVERLAY_URL=https://overlay-us-1.bsvb.tech
 ```
 
 ### Development
@@ -48,7 +48,7 @@ NEXT_PUBLIC_OVERLAY_URL=https://overlay-us-1.bsvb.tech
 npm run dev
 ```
 
-The app will be available at `http://localhost:8080`
+The app will be available at `http://localhost:8080` with instant Hot Module Replacement (HMR).
 
 ### Build
 
@@ -56,11 +56,25 @@ The app will be available at `http://localhost:8080`
 npm run build
 ```
 
-### Start Production Server
+This will:
+1. Run TypeScript type checking
+2. Build optimized production assets to the `dist/` directory
+
+### Preview Production Build
+
+After building, preview the production build locally:
+
+```bash
+npm run preview
+```
+
+Or simply:
 
 ```bash
 npm start
 ```
+
+The server will run on `http://localhost:8080`
 
 ## Docker
 
@@ -118,12 +132,10 @@ The app automatically connects to your BSV wallet via the `WalletClient` from `@
 ## Architecture
 
 ```
-app/
-├── page.tsx                 # Home page (main entry)
-├── layout.tsx               # Root layout with providers
-└── globals.css              # Global styles
-
 src/
+├── main.tsx                 # Application entry point
+├── App.tsx                  # Root component
+├── globals.css              # Global styles
 ├── components/
 │   ├── TokenDemo.tsx        # Main app with tabs
 │   ├── CreateTokens.tsx     # Token minting form
@@ -133,6 +145,9 @@ src/
 │   └── ui/                  # Reusable UI components
 └── context/
     └── WalletContext.tsx    # Wallet state management
+
+index.html                   # HTML entry point
+vite.config.ts               # Vite configuration
 ```
 
 ## Related Documentation

@@ -1,0 +1,2 @@
+/* Import react-toastify CSS in a way that's stable with Turbopack HMR */
+@import 'react-toastify/dist/ReactToastify.css';

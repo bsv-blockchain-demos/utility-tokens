@@ -4,10 +4,11 @@
   "version": "1.0.2",
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 8080",
-    "build": "next build",
-    "start": "next start -p 8080",
-    "lint": "next lint",
+    "dev": "vite --port 8080",
+    "build": "tsc && vite build",
+    "preview": "vite preview --port 8080",
+    "start": "vite preview --port 8080",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
@@ -28,7 +29,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.555.0",
-    "next": "^16.1.1",
     "postcss": "^8.5.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -42,14 +42,18 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.39.1",
-    "eslint-config-next": "^16.1.1",
     "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^16.5.0",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.4"
+    "typescript-eslint": "^8.46.4",
+    "vite": "^6.0.5"
   },
   "overrides": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-toastify": "^11.0.5"
   }
 }

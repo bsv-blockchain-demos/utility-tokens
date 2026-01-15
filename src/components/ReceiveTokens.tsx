@@ -1,4 +1,3 @@
-'use client'
 
 import { useState, useEffect } from 'react'
 import { WalletClient, type AtomicBEEF } from '@bsv/sdk'
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button'
 import { toast } from 'sonner'
 import { useWallet } from '../context/WalletContext'
-import { Download, Check, X, RefreshCw, Clock, Loader2 } from 'lucide-react'
+import { Download, Check, X, RefreshCw, Loader2 } from 'lucide-react'
 
 interface ReceiveTokensProps {
   wallet: WalletClient

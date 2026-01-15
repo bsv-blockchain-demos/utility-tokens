@@ -1,5 +1,3 @@
-'use client'
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { WalletClient } from '@bsv/sdk';
 import { MessageBoxClient } from '@bsv/message-box-client';

@@ -1,4 +1,3 @@
-'use client'
 
 import { useState, useEffect } from 'react'
 import { WalletClient, PushDrop, LockingScript, Utils } from '@bsv/sdk'

@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs'
 import { CreateTokens } from './CreateTokens'

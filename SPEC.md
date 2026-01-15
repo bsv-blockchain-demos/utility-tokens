@@ -10,7 +10,7 @@ The token issuance properties should be flexible enough to accommodate fungible 
 
 ## Tech
 
-Built with Next.js 16, React 19, and TypeScript for a modern, production-ready application.
+Built with Vite 6, React 19, and TypeScript for a modern, lightning-fast development experience and optimized production builds.
 
 We ought to use PushDrop class from the @bsv/sdk to create and redeem tokens using the lock and unlock methods respectively. The fields to use will depend on the particular token type but in general the approach ought to be to mint a token with some properties defining it, then refer to that mint txid in subsequent spends of the token to reduce the amount of data necessary to include in each token. 
 

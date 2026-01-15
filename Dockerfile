@@ -1,36 +1,46 @@
+# Stage 1: Install dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --prefer-offline --no-audit
 
+# Stage 2: Build the application
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Accept build arg for environment variable
-ARG NEXT_PUBLIC_OVERLAY_URL
-ENV NEXT_PUBLIC_OVERLAY_URL=${NEXT_PUBLIC_OVERLAY_URL}
+ARG VITE_OVERLAY_URL
+ENV VITE_OVERLAY_URL=${VITE_OVERLAY_URL}
 
 RUN npm run build
 
-FROM node:20-alpine AS runner
-WORKDIR /app
+# Stage 3: Serve with nginx
+FROM nginx:alpine AS runner
+WORKDIR /usr/share/nginx/html
 
-ENV NODE_ENV=production
+# Remove default nginx static assets
+RUN rm -rf ./*
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+# Copy built assets from builder stage
+COPY --from=builder /app/dist .
 
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-USER nextjs
+# Add non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S -u 1001 -G nodejs nodejs && \
+    chown -R nodejs:nodejs /usr/share/nginx/html && \
+    chown -R nodejs:nodejs /var/cache/nginx && \
+    chown -R nodejs:nodejs /var/log/nginx && \
+    chown -R nodejs:nodejs /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nodejs:nodejs /var/run/nginx.pid
+
+USER nodejs
 
 EXPOSE 8080
 
-ENV PORT=8080
-ENV HOSTNAME="0.0.0.0"
-
-CMD ["node", "server.js"]
+CMD ["nginx", "-g", "daemon off;"]

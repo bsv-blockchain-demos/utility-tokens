@@ -1,7 +1,5 @@
-'use client'
-
 import { TokenDemo } from '@/components/TokenDemo'
 
-export default function Home() {
+export default function App() {
   return <TokenDemo />
 }

@@ -73,9 +73,12 @@ docker-compose -f docker-compose.dev.yml down
 
 **Tokenization Frontend Service**
 - Multi-stage build: deps → builder → runner
-- Next.js standalone output for optimal production builds
-- Self-contained Node.js server on port 8080
+- Vite optimized production build served via Nginx
+- Static assets served from `/usr/share/nginx/html`
+- Runs on port 8080
 - Runs as non-root user for security
+- Includes gzip compression and security headers
+- Health check endpoint at `/health`
 
 **Tokenization Overlay Service**
 - Remote overlay service at https://overlay-us-1.bsvb.tech
@@ -85,9 +88,9 @@ docker-compose -f docker-compose.dev.yml down
 ### Development Setup (`docker-compose.dev.yml`)
 
 **Frontend Service**
-- Runs Next.js dev server with webpack
-- Hot module replacement (HMR) enabled
+- Runs Vite dev server with instant HMR
 - Source code mounted as volume for live updates
+- Optimized development experience with fast refresh
 - Runs on port 8080
 
 **Overlay Service**
@@ -113,8 +116,10 @@ docker-compose -f docker-compose.dev.yml down
 ## Environment Variables
 
 **Frontend**
-- `NEXT_PUBLIC_OVERLAY_URL` - Overlay service endpoint
+- `VITE_OVERLAY_URL` - Overlay service endpoint
   - Default: `https://overlay-us-1.bsvb.tech` (remote overlay service)
+  - Build-time variable for production (passed as Docker build arg)
+  - Runtime variable for development (passed as environment variable)
 
 ## Ports
 
@@ -161,11 +166,14 @@ docker-compose -f docker-compose.dev.yml config
 
 For production deployment:
 
-1. **Environment Variables**: Set `NEXT_PUBLIC_OVERLAY_URL` build arg in docker-compose.yml
+1. **Environment Variables**: Set `VITE_OVERLAY_URL` build arg in docker-compose.yml
 2. **SSL/TLS**: Configure SSL certificates (using Nginx or cloud provider)
-3. **Reverse Proxy**: Consider using a reverse proxy (Traefik, Nginx, Caddy) in front
-4. **Logging**: Configure centralized logging for the Next.js container
-5. **Monitoring**: Add health checks and monitoring
-6. **Security**: Next.js runs as non-root user; review security headers in next.config.mjs
+3. **Reverse Proxy**: The container uses Nginx internally; can add external reverse proxy (Traefik, Caddy) if needed
+4. **Logging**: Configure centralized logging for the Nginx container
+5. **Monitoring**: Health check endpoint available at `/health`
+6. **Security**:
+   - Nginx runs as non-root user
+   - Security headers configured in nginx.conf
+   - Static assets served with cache control headers
 7. **CDN**: Consider using a CDN for static asset delivery
-8. **Caching**: Configure appropriate caching headers in Next.js config
+8. **Caching**: Static assets cached for 1 year with immutable flag

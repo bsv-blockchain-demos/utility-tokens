@@ -1,4 +1,3 @@
-'use client'
 
 import { useState } from 'react'
 import { WalletClient, PushDrop, Utils, Random, BigNumber, HTTPSOverlayBroadcastFacilitator, Transaction } from '@bsv/sdk'
@@ -9,8 +8,8 @@ import { Label } from './ui/label'
 import { toast } from 'sonner'
 import { Coins, Hash, Plus, Trash2, Sparkles, Loader2 } from 'lucide-react'
 
-const OVERLAY_URL = process.env.NEXT_PUBLIC_OVERLAY_URL as string
-if (!OVERLAY_URL) throw new Error('NEXT_PUBLIC_OVERLAY_URL is not defined')
+const OVERLAY_URL = import.meta.env.VITE_OVERLAY_URL as string
+if (!OVERLAY_URL) throw new Error('VITE_OVERLAY_URL is not defined')
 
 interface CreateTokensProps {
   wallet: WalletClient

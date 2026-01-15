@@ -1,18 +1,16 @@
-'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { Transaction, Beef, WalletClient, PushDrop, PublicKey, LockingScript, Random, BigNumber, Utils, HTTPSOverlayBroadcastFacilitator, type AtomicBEEF } from '@bsv/sdk'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
-import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { toast } from 'sonner'
 import { useIdentitySearch } from '@bsv/identity-react'
 import { useWallet } from '../context/WalletContext'
-import { Send, ArrowRight, Loader2 } from 'lucide-react'
+import { Send, Loader2 } from 'lucide-react'
 
-const OVERLAY_URL = process.env.NEXT_PUBLIC_OVERLAY_URL as string
-if (!OVERLAY_URL) throw new Error('NEXT_PUBLIC_OVERLAY_URL is not defined')
+const OVERLAY_URL = import.meta.env.VITE_OVERLAY_URL as string
+if (!OVERLAY_URL) throw new Error('VITE_OVERLAY_URL is not defined')
 
 interface SendTokensProps {
   wallet: WalletClient
