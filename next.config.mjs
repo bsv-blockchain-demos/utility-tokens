@@ -2,7 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  turbopack: {},
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        // Node.js polyfills for browser
+      },
+      resolveExtensions: ['.tsx', '.ts', '.jsx', '.js'],
+    },
+  },
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
