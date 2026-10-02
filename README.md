@@ -1,160 +1,76 @@
-# BSV Token Demo - Frontend
+# Utility Tokens
 
-A React + TypeScript frontend for creating, transferring, and managing tokens on the BSV blockchain using the PushDrop protocol.
+A React and TypeScript demo for issuing and transferring fungible PushDrop tokens through a BRC-100 wallet, an overlay service and a message box. It demonstrates token custody and recipient acceptance using the BSV SDK.
 
-## Features
+This repository contains the frontend. Overlay validation and message delivery are provided by external services; their server implementations are not included here.
 
-- **Create Tokens**: Mint new fungible tokens with custom fields
-- **Token Wallet**: View your token balances and holdings
-- **Send Tokens**: Transfer tokens to other users
-- **Receive Tokens**: Accept incoming token transfers
+## What the demo provides
 
-## Tech Stack
+- **Create Tokens:** choose a label, an amount and optional custom fields, then mint a token output.
+- **Token Wallet:** inspect tokens held in the wallet's `demotokens3` basket.
+- **Send Tokens:** select holdings, identify a recipient and create recipient and change outputs.
+- **Receive Tokens:** list pending messages and import a payment into the wallet or dismiss its message.
 
-- **Vite 6** - Next-generation frontend build tool with fast HMR
-- **React 19** - UI framework
-- **TypeScript** - Type safety
-- **Tailwind CSS v4** - Modern utility-first styling
-- **@bsv/sdk** - BSV blockchain SDK with PushDrop support
-- **@bsv/identity-react** - Identity management and search
-- **@bsv/message-box-client** - Peer-to-peer messaging
-- **Radix UI** - Accessible component primitives
-- **Sonner** - Toast notifications
+Creation and transfer use real wallet transactions. Each token output carries one satoshi, separate from the token quantity recorded in its script. The connected wallet also supplies transaction fees.
 
-## Getting Started
+## Run locally
 
-### Prerequisites
+Use Node.js 22 and npm, a running BRC-100 wallet and network access to the configured services. For a transfer demonstration, use two wallet identities with suitable message-box support.
 
-- Node.js 18+
-- A BSV wallet browser extension (e.g., [Panda Wallet](https://github.com/Panda-Wallet/panda-wallet))
-
-### Installation
-
-```bash
-npm install
-```
-
-### Configuration
-
-Create a `.env` file in the root directory with the following:
-
-```bash
-VITE_OVERLAY_URL=https://overlay-us-1.bsvb.tech
-```
-
-### Development
-
-```bash
+```sh
+git clone https://github.com/bsv-blockchain-demos/utility-tokens.git
+cd utility-tokens
+npm ci
 npm run dev
 ```
 
-The app will be available at `http://localhost:8080` with instant Hot Module Replacement (HMR).
+Open `http://localhost:8080` and approve the wallet requests as needed. Initialising `WalletClient` does not itself establish that the wallet is authenticated or supports every operation the demo needs.
 
-### Build
+## Service configuration
 
-```bash
-npm run build
-```
+| Service | Current setting |
+| --- | --- |
+| Overlay | `https://overlay-us-1.bsvb.tech`, hardcoded in the creation and sending components. |
+| Overlay topic | `tm_tokendemo`. |
+| Message box | `https://messagebox.babbage.systems`, configured in the wallet context with the `mainnet` preset. |
+| Message queue | `demotokenpayments`. |
+| Wallet basket | `demotokens3`. |
 
-This will:
-1. Run TypeScript type checking
-2. Build optimized production assets to the `dist/` directory
+Although `.env.example` and the Docker build expose `VITE_OVERLAY_URL`, the current frontend does not read that variable. Changing it alone will not switch the overlay. Review the constants in [CreateTokens.tsx](src/components/CreateTokens.tsx), [SendTokens.tsx](src/components/SendTokens.tsx) and [WalletContext.tsx](src/context/WalletContext.tsx) when configuring a different environment.
 
-### Preview Production Build
+## Try a transfer
 
-After building, preview the production build locally:
+1. In the first wallet, create a small integer quantity with a recognisable label.
+2. Check the result in **Token Wallet** and confirm that overlay admission succeeded.
+3. In **Send Tokens**, choose the token and recipient identity, then approve the transfer.
+4. Switch to the recipient wallet and open **Receive Tokens**.
+5. Accept the message to internalise output zero into the recipient's token basket. Refresh the wallet view to inspect the result.
 
-```bash
-npm run preview
-```
+The token identifier is based on the original mint outpoint. Subsequent outputs reference that identifier. Custom fields are included at minting, but the sending code currently carries forward only the label.
 
-Or simply:
+## Current limitations
 
-```bash
-npm start
-```
+- **Reject** acknowledges and removes the message. It does not reverse the transaction or return tokens to the sender.
+- The wallet display uses the transaction ID for a fresh mint, while the transfer flow uses `txid.outputIndex`. This inconsistency can split the displayed balances for the same token.
+- Balance loading reads at most 1,000 outputs and does not paginate further.
+- Quantities are encoded as unsigned 64-bit values but are also converted to JavaScript numbers in the UI. Use small integer demo amounts; the interface does not enforce full integer-range correctness.
+- Overlay admission and message delivery happen after wallet transaction creation. A later error does not imply that the wallet transaction was cancelled.
+- The UI implements minting and transfers. Revocation and dedicated NFT workflows mentioned in [SPEC.md](SPEC.md) remain outside the implemented interface.
 
-The server will run on `http://localhost:8080`
+## Build and Docker
 
-## Docker
+| Command | Purpose |
+| --- | --- |
+| `npm run build` | Type-check and build static assets in `dist/`. |
+| `npm run preview` or `npm start` | Preview an existing build on port 8080. |
+| `npm run lint` | Run ESLint. |
+| `docker compose up --build -d` | Build and serve the frontend through Nginx on port 8080. |
+| `docker compose -f docker-compose.dev.yml up --build` | Start the development container configuration. |
 
-This project includes Docker support for both development and production environments.
+Docker runs only the frontend; the wallet, overlay and message-box prerequisites still apply. The `docker:*` npm scripts use the older `docker-compose` executable spelling. See [DOCKER.md](DOCKER.md) for the supplied container configuration, taking the unused overlay environment variable into account.
 
-### Quick Start with Docker
+No automated test script is defined. Building the frontend does not verify a live token transfer or the external overlay's rules.
 
-```bash
-# Production mode
-npm run docker:prod
+## Licence
 
-# Development mode (with hot reload)
-npm run docker:dev
-
-# Stop services
-npm run docker:down
-
-# View logs
-npm run docker:logs
-```
-
-For detailed Docker documentation, see [DOCKER.md](DOCKER.md)
-
-## How It Works
-
-### Token Creation
-
-1. Navigate to the "Create Tokens" tab
-2. Enter a Token ID (e.g., "Local Store Credits")
-3. Specify the amount to mint
-4. Optionally add custom fields (key-value pairs)
-5. Click "Create Tokens"
-
-The app uses the `PushDrop` class from `@bsv/sdk`:
-
-```typescript
-const token = new PushDrop(wallet)
-const protocolID = [2, 'tokendemo']
-const keyID = Utils.toBase64(Random(8))
-const lockingScript = await token.lock(fields, protocolID, keyID, 'self', true, true)
-```
-
-### Token Transfers
-
-1. Go to "Send Tokens" tab
-2. Select the token ID and amount
-3. Enter recipient's identity key
-4. The transaction is sent to their message box
-5. Recipient can accept in the "Receive Tokens" tab
-
-### Wallet Integration
-
-The app automatically connects to your BSV wallet via the `WalletClient` from `@bsv/sdk`. Make sure you have a compatible wallet installed.
-
-## Architecture
-
-```
-src/
-├── main.tsx                 # Application entry point
-├── App.tsx                  # Root component
-├── globals.css              # Global styles
-├── components/
-│   ├── TokenDemo.tsx        # Main app with tabs
-│   ├── CreateTokens.tsx     # Token minting form
-│   ├── TokenWallet.tsx      # Balance display
-│   ├── SendTokens.tsx       # Transfer interface
-│   ├── ReceiveTokens.tsx    # Accept incoming tokens
-│   └── ui/                  # Reusable UI components
-└── context/
-    └── WalletContext.tsx    # Wallet state management
-
-index.html                   # HTML entry point
-vite.config.ts               # Vite configuration
-```
-
-## Related Documentation
-
-- [DOCKER.md](DOCKER.md) - Docker setup and deployment guide
-- [SPEC.md](SPEC.md) - Full specification and technical details
-
-## License
-
-MIT
+The previous README stated MIT, but this checkout has no standalone licence file and `package.json` does not declare a licence. The intended licence needs confirmation.
