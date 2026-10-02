@@ -73,4 +73,4 @@ No automated test script is defined. Building the frontend does not verify a liv
 
 ## Licence
 
-The previous README stated MIT, but this checkout has no standalone licence file and `package.json` does not declare a licence. The intended licence needs confirmation.
+**Documented licence: MIT.** This is the declaration recorded in the project documentation. No standalone licence file or package licence declaration is included in this repository.
